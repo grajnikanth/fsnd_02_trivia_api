@@ -105,10 +105,12 @@ Base URL: Currently this application is only hosted locally. The backend is host
 
 ## Endpoints
 GET /categories
-General: Returns a list categories.
+
+General: Returns all the categories in the database with their ids and categories as key value pairs.
 
 Sample: curl http://127.0.0.1:5000/categories
 
+```
   {
       "categories": {
           "1": "Science", 
@@ -118,5 +120,200 @@ Sample: curl http://127.0.0.1:5000/categories
           "5": "Entertainment", 
           "6": "Sports"
       }, 
-      "success": true
+      "success": True
   }
+  
+```
+GET /questions
+
+General: Returns list of all questions stored in the database. Results are paginated in groups of 10. Also returns list of categories and total number of questions.
+
+Sample: curl http://127.0.0.1:5000/questions
+
+```
+  {
+      "success": True, 
+      "total_questions": 19
+      "categories": {
+          "1": "Science", 
+          "2": "Art", 
+          "3": "Geography", 
+          "4": "History", 
+          "5": "Entertainment", 
+          "6": "Sports"
+      }, 
+      "questions": [
+          {
+              "answer": "Maya Angelou", 
+              "category": 4, 
+              "difficulty": 2, 
+              "id": 5, 
+              "question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings?"
+          }, 
+          {
+              "answer": "Muhammad Ali", 
+              "category": 4, 
+              "difficulty": 1, 
+              "id": 9, 
+              "question": "What boxer's original name is Cassius Clay?"
+          }, .......
+      ] 
+  }
+
+```
+
+DELETE /questions/\<int:question_id\>
+
+General: Deletes a question by id using url parameters. Returns id of deleted question upon success, list of current questions left in the database and the number of questions in the database.
+
+Sample: curl -X DELETE http://127.0.0.1:5000/questions/6
+
+```
+  {
+      "success": True,
+      "deleted": 6, 
+      "success": true
+      "total_questions": 18
+      "questions": [
+          {
+              "answer": "Maya Angelou", 
+              "category": 4, 
+              "difficulty": 2, 
+              "id": 5, 
+              "question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings?"
+          }, 
+          {
+              "answer": "Muhammad Ali", 
+              "category": 4, 
+              "difficulty": 1, 
+              "id": 9, 
+              "question": "What boxer's original name is Cassius Clay?"
+          }, .......
+      ] 
+      
+  }
+```
+
+POST /questions
+
+General: This endpoint either creates a new question or returns search results. If no search term is included in request:
+Creates a new question in the database using JSON request parameters.
+
+Returns JSON object with newly created question id, as well as paginated list of all the questions in the database and the current number of questions in the database
+
+Sample: curl http://127.0.0.1:5000/questions -X POST -H "Content-Type: application/json" -d '{ "question": "Who won the most NBA championships?", "answer": "Bill Russell", "difficulty": 2, "category": "6" }'
+```
+  {
+      "success": True,
+      "created": 24,
+      "total_questions": 19,
+            "questions": [
+          {
+              "answer": "Bill Russell", 
+              "category": 6, 
+              "difficulty": 2, 
+              "id": 24, 
+              "question": "Who won the most NBA championships?"
+          }, 
+          {
+              "answer": "Muhammad Ali", 
+              "category": 4, 
+              "difficulty": 1, 
+              "id": 9, 
+              "question": "What boxer's original name is Cassius Clay?"
+          }, .......
+      ] 
+  }
+```
+
+If search term is included in request:
+
+Searches for questions using search term in JSON request parameters.
+
+Returns JSON object with paginated matching questions, total number of matching questions, a list of all categories and current category is returned as None.
+
+Sample: curl http://127.0.0.1:5000/questions -X POST -H "Content-Type: application/json" -d '{"searchTerm": "penicillin"}'
+```
+  {
+      "success": True,
+      "total_questions": 1,
+      "questions": [
+          {
+              "answer": "Alexander Fleming", 
+              "category": 1, 
+              "difficulty": 3, 
+              "id": 21, 
+              "question": "Who discovered penicillin?"
+          }, 
+      ], 
+      "categories": {
+          "1": "Science", 
+          "2": "Art", 
+          "3": "Geography", 
+          "4": "History", 
+          "5": "Entertainment", 
+          "6": "Sports"
+      }
+      "current_category": None
+  }
+  ```
+
+GET /categories/\<int:category_id\>/questions
+General: Gets questions by category id using url parameters.
+
+Returns JSON object with paginated list of questions which belong to the Category provided. If the category is not present in the database, error handler return status_code 400 - Bad Request. It also returns the current category id and the total number of questions in the category requested.
+
+Sample: curl http://127.0.0.1:5000/categories/1/questions
+```
+  {
+      "success": true, 
+      "current_category": 1, 
+      "total_questions": 3,
+      "questions": [
+          {
+              "answer": "The Liver", 
+              "category": 1, 
+              "difficulty": 4, 
+              "id": 20, 
+              "question": "What is the heaviest organ in the human body?"
+          }, 
+          {
+              "answer": "Alexander Fleming", 
+              "category": 1, 
+              "difficulty": 3, 
+              "id": 21, 
+              "question": "Who discovered penicillin?"
+          }, 
+          {
+              "answer": "Blood", 
+              "category": 1, 
+              "difficulty": 4, 
+              "id": 22, 
+              "question": "Hematology is a branch of medicine involving the study of what?"
+          }
+      ]
+  }
+  ```
+  
+POST /quizzes
+
+General: Allows users to play the quiz game either from questions from all categories or from a category of choosing. Uses JSON request parameters of category and previous questions.
+
+Returns JSON object with random question not among previous questions.
+
+Sample: curl http://127.0.0.1:5000/quizzes -X POST -H "Content-Type: application/json" -d '{"previous_questions": [13, 14], "quiz_category": {"type": "Geography", "id": "3"}}'
+```
+  {
+      "question": {
+          "answer": "Agra", 
+          "category": 3, 
+          "difficulty": 2, 
+          "id": 15, 
+          "question": "The Taj Mahal is located in which Indian city?"
+      }, 
+      "success": True
+  }
+```
+## Authors
+Raj Gedhada authored the API (__init__.py), test suite (test_flaskr.py), and this README.
+All other project files were provided by [Udacity](https://udacity.com) as a project starter code for the Full Stack Web Developer Nanodegree.
